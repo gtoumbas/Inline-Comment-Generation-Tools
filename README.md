@@ -1,3 +1,3 @@
-# Inline-Comment-Genereation
+# Inline-Comment-Generation
  
  Junior Independent Work
