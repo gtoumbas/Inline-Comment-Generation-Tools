@@ -152,12 +152,12 @@ error_file = 'errors.txt'
 no_dups = 'raw_links_no_dups.txt'
 num_files = 1000
 out_dir = 'py_files'
-start_num = 28004+48119
+start_num = 28004+48119+79488
 # repos = get_used_repos(no_dups)
 # print(len(repos))
 # print(repos)
 
-# download_files(no_dups, out_dir, error_file, start_index=start_num, debug=True)
+download_files(no_dups, out_dir, error_file, start_index=start_num, debug=True)
 
 
 
