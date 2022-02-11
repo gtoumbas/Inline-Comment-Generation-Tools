@@ -111,8 +111,11 @@ def download_files(raw_links, out_dir, error_file, num_files=0, debug=False, sta
                 f.write(f"{curr_link}   Index: {i+start_index}\n")
             num_errors += 1
             continue
-
-        curr_repo = url_to_repo(curr_link)
+        
+        try:
+            curr_repo = url_to_repo(curr_link)
+        except:
+            continue
 
         if not curr_file:
             curr_file = curr_repo
@@ -152,7 +155,7 @@ error_file = 'errors.txt'
 no_dups = 'raw_links_no_dups.txt'
 num_files = 1000
 out_dir = 'py_files'
-start_num = 28004+48119+79488
+start_num = 28004+48119+79488+288780
 # repos = get_used_repos(no_dups)
 # print(len(repos))
 # print(repos)

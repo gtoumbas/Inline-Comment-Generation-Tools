@@ -8,20 +8,19 @@ import pandas as pd
 from pprint import pprint
 from tqdm import tqdm
 
-"""
-Extracts all inline comment and code pairs from a given file
 
-Args:
-filename (str): name of txt file with python source code.
-num_lines (int): number of lines of code paired with each comment 
-above (boolean): Collects num_code_lines of code above comment (if possible) in addition to below
-
-"""
 def get_all_pairs(filename, num_lines, above=False):
+    """Extracts all inline comment and code pairs from a given file
 
-    # Filters for non-descriptive comments
-    filters = ["#!", "#\n", "# \n", "-*-", "Copyright", "##", "TODO", "http" ]
+    Args:
+        filename (str): name of txt file with python source code.
+        num_lines (int): number of lines of code paired with each comment
+        above (bool, optional): Collects num_code_lines of code above comment 
+        (if possible) in addition to below. Defaults to False.
 
+    Returns:
+        [type]: [description]
+    """
 
     with open(filename, 'r') as f:
         lines = f.readlines()
@@ -31,8 +30,6 @@ def get_all_pairs(filename, num_lines, above=False):
 
     for i in range(len(lines)):
         line = lines[i]
-
-        # Not sure if I should remove newlines and tabs from code (probably not)
 
         # Line contains no comments
         if '#' not in line:
@@ -50,10 +47,12 @@ def get_all_pairs(filename, num_lines, above=False):
         # TODO How should i handle multiple line comments that use #? Could combine them all into single commment 
         # TODO Have a check to make sure comments are in English
         # TODO Could filter out ?'s as well 
+        # TODO Not sure if I should remove newlines and tabs from code (probably not)
+        # TODO Filter for lines which only contain # and no actual text
 
 
 
-        # IGNORING SAME LINE COMMENTS FOR NOW
+        # IGNORING SAME LINE COMMENTS FOR NOW (i.e some code #some comment)
         # Line does not start with a comment
         if line_stripped[0] != '#':
             continue
@@ -89,8 +88,8 @@ def get_all_pairs(filename, num_lines, above=False):
         # For testing
         # if num_comments >= 10:
         #     break
-    # return num_comments
-    return pairs
+    return num_comments
+    # return pairs
     print(num_comments)
 
 # TODO improve filtering
@@ -115,20 +114,22 @@ new_bar = tqdm(all_filepaths)
 for f in new_bar:
     if ".DS" in f:
         continue
-    pairs.extend(get_all_pairs("py_files/"+f, 3))
+    # pairs.extend(get_all_pairs("py_files/"+f, 3))
+    count += get_all_pairs("py_files/"+f, 3)
 
-df = pd.DataFrame.from_dict(pairs, orient='columns')
-df.style
-# calculate and assign new columns
-df['Characters'] = df['comment'].str.len()
-df['Words'] = df['comment'].str.split().str.len()
-print(df)
+print(count)
+# df = pd.DataFrame.from_dict(pairs, orient='columns')
+# df.style
+# # calculate and assign new columns
+# df['Characters'] = df['comment'].str.len()
+# df['Words'] = df['comment'].str.split().str.len()
+# print(df)
 
-mean_characters = df['Characters'].mean()
-mean_words = df['Words'].mean()
+# mean_characters = df['Characters'].mean()
+# mean_words = df['Words'].mean()
 
-print(mean_characters)
-print(mean_words)
+# print(mean_characters)
+# print(mean_words)
 
 # print(tabulate(df, headers = 'keys', tablefmt = 'psql'))
 # print(count)
