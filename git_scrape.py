@@ -15,6 +15,13 @@ from tqdm import tqdm, trange
 Recursively explores Github Repo and writes raw python file links to file.
 """
 def get_py_files(url, out_file, depth=0):
+    """[summary]
+
+    Args:
+        url ([type]): [description]
+        out_file ([type]): [description]
+        depth (int, optional): [description]. Defaults to 0.
+    """
     try:
         page = requests.get(url)
     except:
@@ -57,6 +64,14 @@ def get_py_files(url, out_file, depth=0):
 
 
 def get_used_repos(raw_links):
+    """[summary]
+
+    Args:
+        raw_links ([type]): [description]
+
+    Returns:
+        [type]: [description]
+    """
     used_repos = []
     curr_repo = ''
 
@@ -83,12 +98,31 @@ def get_used_repos(raw_links):
 
 
 def is_used_repo(url, repo_list):
+    """[summary]
+
+    Args:
+        url ([type]): [description]
+        repo_list ([type]): [description]
+
+    Returns:
+        [type]: [description]
+    """
     com_ind = url.index('com')
     repo_name = url[com_ind:].split('/')[1] + '--' + url[com_ind:].split('/')[2]
     return (repo_name in repo_list, repo_name)
 
 
 def download_files(raw_links, out_dir, error_file, num_files=0, debug=False, start_index=0):
+    """[summary]
+
+    Args:
+        raw_links ([type]): [description]
+        out_dir ([type]): [description]
+        error_file ([type]): [description]
+        num_files (int, optional): [description]. Defaults to 0.
+        debug (bool, optional): [description]. Defaults to False.
+        start_index (int, optional): [description]. Defaults to 0.
+    """
     with open(raw_links, 'r') as f:
         all_links = f.readlines()
 
