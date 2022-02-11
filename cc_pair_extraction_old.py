@@ -105,38 +105,44 @@ def get_code_comment_pairs(source_string, filter, debug=False):
     return cc_pairs
 
 def create_pairs(src_path, json_file_path, start_filters):
-    all_filepaths = os.listdir(src_path)
+    # all_filepaths = os.listdir(src_path)
     all_cc_pairs = []
     num_failed = 0
-    for fpath in tqdm(all_filepaths, desc = 'Extracting Pairs'):
-
-        # Read txt file as single string
-        code = open(src_path + "/" + fpath)
-        try:
-            code_as_string = code.read()
-        except:
-            num_failed += 1
-            code.close()
-            continue
-
+    # for fpath in tqdm(all_filepaths, desc = 'Extracting Pairs'):
+    # Read txt file as single string
+    code = open(src_path)
+    try:
+        code_as_string = code.read()
+    except:
+        num_failed += 1
         code.close()
+        return
+        # continue
 
-        # extract pairs
-        cc_pairs = get_code_comment_pairs(code_as_string, start_filters)
-        if cc_pairs:
-            for pair in cc_pairs:
-                all_cc_pairs.append(pair)
-        else:
-            num_failed += 1
+    code.close()
+
+    # extract pairs
+    cc_pairs = get_code_comment_pairs(code_as_string, start_filters)
+    if cc_pairs:
+        for pair in cc_pairs:
+            all_cc_pairs.append(pair)
+    else:
+        num_failed += 1
     
-    # Save pairs to json file
-    with open(json_file_path, 'w') as out_file:
-        json.dump(all_cc_pairs, out_file, indent=4)
+    
+    # # Save pairs to json file
+    # with open(json_file_path, 'w') as out_file:
+    #     json.dump(all_cc_pairs, out_file, indent=4)
+
+    for pair in all_cc_pairs:
+      print(f"COMMENT: \n{pair['comm']}\n")
+      print(f"CODE: \n{pair['code']}\n\n")
+      
 
     print(f"Num Files with no inline comments found: {num_failed}")
     print(f"Number of Pairs Extracted: {len(all_cc_pairs)}")
 
-src_path = "py150_files/just_files"
+src_path = "py_files/1adrianb--face-alignment.txt"
 start_filters = ["#!", "#\n", "# \n", "-*-", "Copyright", "##", "TODO", "http" ]
 json_path = "cc_pairs.json"
 
