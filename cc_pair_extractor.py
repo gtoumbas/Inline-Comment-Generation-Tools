@@ -3,13 +3,24 @@ import ast
 import json
 import re 
 
+import numpy as np
 from tabulate import tabulate
 import pandas as pd
 from pprint import pprint
 from tqdm import tqdm
 
 
-def get_all_pairs(filename, num_lines, above=False):
+# TODOS
+# TODO should I even include same line comments? Or should i ignore them?
+# TODO How should i handle multiple line comments that use #? Could combine them all into single commment 
+    # Right now each line in multi line comment is counting as individual comment. Need to change this
+# TODO Have a check to make sure comments are in English
+# TODO Could filter out ?'s as well 
+# TODO Not sure if I should remove newlines and tabs from code (probably not)
+# TODO Filter for lines which only contain # and no actual text
+
+
+def get_pairs(filename, num_lines, above=False):
     """Extracts all inline comment and code pairs from a given file
 
     Args:
@@ -21,76 +32,83 @@ def get_all_pairs(filename, num_lines, above=False):
     Returns:
         [type]: [description]
     """
-
     with open(filename, 'r') as f:
         lines = f.readlines()
-
     pairs = []
-    num_comments = 0
+    # num_comments = 0
 
     for i in range(len(lines)):
         line = lines[i]
+        comment = get_comment(line)
 
-        # Line contains no comments
-        if '#' not in line:
-            continue
-        
-        # Filters unwanted comments
-        if not is_descriptive(line):
-            continue 
-    
-        # Removes all trailing and preceding whitespaces from line (including tabs)
-        line_stripped = re.sub('\s+',' ', line).strip()
-        
-        # TODOS
-        # TODO should I even include same line comments? Or should i ignore them?
-        # TODO How should i handle multiple line comments that use #? Could combine them all into single commment 
-        # TODO Have a check to make sure comments are in English
-        # TODO Could filter out ?'s as well 
-        # TODO Not sure if I should remove newlines and tabs from code (probably not)
-        # TODO Filter for lines which only contain # and no actual text
+        if not comment: continue
 
+        # Excludes everything but single line comments
+        if i != 0 and get_comment(lines[i-1]): continue
+        if i != (len(lines)-1) and get_comment(lines[i+1]): continue 
 
+        above_code, below_code = get_code(i, lines, num_lines, above=above)
 
-        # IGNORING SAME LINE COMMENTS FOR NOW (i.e some code #some comment)
-        # Line does not start with a comment
-        if line_stripped[0] != '#':
-            continue
-
-        num_comments += 1
-        
-        # Isolate just text of comment
-        comment = line_stripped[1:]
-        comment.strip() # removes potential space between # and actual comment
-
-        # TODO right type for these? List or str?
-        above_code = ""
-        below_code = ""
-
-        # Get code above 
         if above:
-            num_above = num_lines
-            if i - num_lines < 0: num_above = i + 1 # +1 because range is exclusive
-            for j in range(1, num_above): above_code += lines[i-j]
-
-        # Get code below 
-        num_below = num_lines
-        if i + num_lines >= len(lines): num_below = len(lines) - i
-        for j in range(1, num_below): below_code += (lines[i+j])
+            pair = {'comment': comment, 'below_code': below_code, 'above_code': above_code}
+        else:
+            pair = {'comment': comment, 'below_code': below_code} 
         
-        
-        # print(comment)
-        # for l in below_code:
-        #     print(l)
-
-        pair = {'comment': comment, 'below_code': below_code, 'above_code': above_code}
         pairs.append(pair)
-        # For testing
-        # if num_comments >= 10:
-        #     break
-    return num_comments
-    # return pairs
-    print(num_comments)
+
+    return pairs
+
+def get_code(index, lines, num_lines, above=False):
+    # TODO right type for these? List or str?
+    above_code = ""
+    below_code = ""
+
+    # Get code above 
+    if above:
+        num_above = num_lines
+        if index - num_lines < 0: num_above = index + 1 # +1 because range is exclusive
+        for j in range(1, num_above): above_code += lines[index-j]
+
+    # Get code below 
+    num_below = num_lines
+    if index + num_lines >= len(lines): num_below = len(lines) - index
+    for j in range(1, num_below): below_code += (lines[index+j])
+
+    return above_code, below_code
+    
+
+# Currently only gets comments above code, not on same line
+def get_comment(line):
+    """ Returns comment if line is a comment, None otherwise. Filters for descriptive comments
+        as well.
+    Args:
+        line ([type]): [description]
+
+    Returns:
+        [type]: [description]
+    """
+
+    # Line contains no comments
+    if '#' not in line: return
+
+    # Filters unwanted comments
+    if not is_descriptive(line): return 
+
+    # Removes all trailing and preceding whitespaces from line (including tabs)
+    line_stripped = re.sub('\s+',' ', line).strip()
+    
+    # Line does not start with a comment
+    if line_stripped[0] != '#': return
+
+    # Isolate just text of comment
+    comment = line_stripped[1:]
+    comment.strip() # removes potential space between # and actual comment
+
+    # Is commented out code
+    if is_valid_python(comment): return 
+
+    return comment
+
 
 # TODO improve filtering
 def is_descriptive(comment):
@@ -103,39 +121,48 @@ def is_descriptive(comment):
     
     return True
 
-all_filepaths = os.listdir('py_files')
 
-file = "py_files/1adrianb--face-alignment.txt"
+# TODO Link Stackoverflow source for this function
+def is_valid_python(code):
+   try:
+       ast.parse(code)
+   except SyntaxError:
+       return False
+   return True
+
+
+def get_all_pairs(directory, num_lines, out_file, above=False, num_files=0):
+    all_filepaths = os.listdir(directory)
+    total_num = len(all_filepaths)
+    if num_files:
+        total_num = num_files
+
+    new_bar = tqdm(range(total_num))
+    pairs = []
+    for i in new_bar:
+        f = all_filepaths[i]
+
+        if ".DS" in f:
+            continue
+        file_name = directory + "/" + f
+        pairs.extend(get_pairs(file_name, num_lines))
+    
+    # Remove duplicates
+    pairs = pd.DataFrame(pairs).drop_duplicates()
+
+    # for idx, group in pairs.groupby(np.arange(len(pairs))//150000): 
+    #     group.to_json(f'{idx}_pairs.json', orient='records')
+
+    # pairs.to_json(out_file, orient='records')
+    print(len(pairs.index))
+    return pairs
 
 #TODO make sure to filter out duplicate comments
-pairs = []
-count = 0
-new_bar = tqdm(all_filepaths)
-for f in new_bar:
-    if ".DS" in f:
-        continue
-    # pairs.extend(get_all_pairs("py_files/"+f, 3))
-    count += get_all_pairs("py_files/"+f, 3)
 
-print(count)
-# df = pd.DataFrame.from_dict(pairs, orient='columns')
-# df.style
-# # calculate and assign new columns
-# df['Characters'] = df['comment'].str.len()
-# df['Words'] = df['comment'].str.split().str.len()
-# print(df)
+directory = 'py_files'
+out_file = 'test.json'
+pairs = get_all_pairs(directory, 5, out_file, num_files=20)
 
-# mean_characters = df['Characters'].mean()
-# mean_words = df['Words'].mean()
-
-# print(mean_characters)
-# print(mean_words)
-
-# print(tabulate(df, headers = 'keys', tablefmt = 'psql'))
-# print(count)
-
-# pairs = get_all_pairs(file, 10)
-
-# for p in pairs:
-#     print("COMMENT: " + p['comment']+"\n")
-#     print(p['below_code']+"\n")
+for index, p in pairs.iterrows():
+    print(f"((((({p['comment']})))))")
+    print(p['below_code'])
