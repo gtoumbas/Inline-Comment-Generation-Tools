@@ -9,7 +9,6 @@ import pandas as pd
 from pprint import pprint
 from tqdm import tqdm
 
-
 # TODOS
 # TODO should I even include same line comments? Or should i ignore them?
 # TODO How should i handle multiple line comments that use #? Could combine them all into single commment 
@@ -47,6 +46,8 @@ def get_pairs(filename, num_lines, above=False):
         if i != 0 and get_comment(lines[i-1]): continue
         if i != (len(lines)-1) and get_comment(lines[i+1]): continue 
 
+
+
         above_code, below_code = get_code(i, lines, num_lines, above=above)
 
         if above:
@@ -57,6 +58,16 @@ def get_pairs(filename, num_lines, above=False):
         pairs.append(pair)
 
     return pairs
+
+
+# -*- coding: utf-8 -*-
+def is_english(s):
+    try:
+        s.encode(encoding='utf-8').decode('ascii')
+    except UnicodeDecodeError:
+        return False
+    else:
+        return True
 
 def get_code(index, lines, num_lines, above=False):
     # TODO right type for these? List or str?
@@ -106,6 +117,13 @@ def get_comment(line):
 
     # Is commented out code
     if is_valid_python(comment): return 
+
+    # Make sure comment contains some english letters 
+    has_alpha = any(c.isalpha() for c in comment)
+
+    if not has_alpha: return
+
+    if not is_english(comment): return
 
     return comment
 
@@ -161,8 +179,9 @@ def get_all_pairs(directory, num_lines, out_file, above=False, num_files=0):
 
 directory = 'py_files'
 out_file = 'test.json'
-pairs = get_all_pairs(directory, 5, out_file, num_files=20)
+pairs = get_all_pairs(directory, 5, out_file)
 
-for index, p in pairs.iterrows():
-    print(f"((((({p['comment']})))))")
-    print(p['below_code'])
+# print(len(pairs))
+# for index, p in pairs.iterrows():
+#     print(f"((((({p['comment']})))))")
+#     print(p['below_code'])
