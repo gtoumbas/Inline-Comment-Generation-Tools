@@ -16,11 +16,16 @@ from tqdm import tqdm
 # TODO Have a check to make sure comments are in English
 # TODO Could filter out ?'s as well 
 # TODO Not sure if I should remove newlines and tabs from code (probably not)
-# TODO Filter for lines which only contain # and no actual text
+# TODO Take code structure into account (i.e tab structure) 
+    # Could write a function to find end line
+    # Count number of tabs maybe? 
+    # 
+# TODO Find max sequence length of CODET5 and CODEBERT
+# TODO 
 
 
 def get_pairs(filename, num_lines, above=False):
-    """Extracts all inline comment and code pairs from a given file
+    """Extracts inline comment and code pairs from a given file
 
     Args:
         filename (str): name of txt file with python source code.
@@ -29,7 +34,7 @@ def get_pairs(filename, num_lines, above=False):
         (if possible) in addition to below. Defaults to False.
 
     Returns:
-        [type]: [description]
+        pairs (list): list of comment / code pairs (str) found in file
     """
     with open(filename, 'r') as f:
         lines = f.readlines()
@@ -168,6 +173,7 @@ def get_all_pairs(directory, num_lines, out_file, above=False, num_files=0):
     # Remove duplicates
     pairs = pd.DataFrame(pairs).drop_duplicates()
 
+    # Saving pairs to multiple files 
     # for idx, group in pairs.groupby(np.arange(len(pairs))//150000): 
     #     group.to_json(f'{idx}_pairs.json', orient='records')
 
@@ -179,9 +185,9 @@ def get_all_pairs(directory, num_lines, out_file, above=False, num_files=0):
 
 directory = 'py_files'
 out_file = 'test.json'
-pairs = get_all_pairs(directory, 5, out_file)
+pairs = get_all_pairs(directory, 5, out_file, num_files=4)
 
-# print(len(pairs))
-# for index, p in pairs.iterrows():
-#     print(f"((((({p['comment']})))))")
-#     print(p['below_code'])
+print(len(pairs))
+for index, p in pairs.iterrows():
+    print(f"((((({p['comment']})))))")
+    print(p['below_code'])

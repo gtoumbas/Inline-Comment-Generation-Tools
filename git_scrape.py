@@ -29,7 +29,6 @@ def get_py_files(url, out_file, depth=0):
 
     if depth > 4:
         return
-    
 
     raw_prefix = "https://raw.githubusercontent.com" #raw text url prefix
     norm_prefix = "https://github.com"
@@ -83,11 +82,9 @@ def get_used_repos(raw_links):
         try:
             repo_name = link[com_ind:].split('/')[1] + '/' + link[com_ind:].split('/')[2]
         except:
-            # print(link)
             continue
         repo_name.rstrip()
-        # if '\n' in repo_name:
-        #     print(link)
+
         if repo_name in used_repos:
             continue
         if not curr_repo or curr_repo != repo_name:
