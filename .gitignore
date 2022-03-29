@@ -1,5 +1,9 @@
 # Dataset files
 py150_files/
+data/
+*.jsonl
+*.ipynb
+*.json
 cc_pairs.json
 *.txt
 *.zip

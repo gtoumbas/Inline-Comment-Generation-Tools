@@ -13,6 +13,7 @@ def is_valid_python(code):
    return True
 
 
+
 """Returns false if doesn't have, otherwise returns comment and end of comment position.
    
 """
