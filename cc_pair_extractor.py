@@ -16,14 +16,6 @@ from fuzzywuzzy import fuzz
 import sklearn 
 
 
-# TODOS
-# TODO should I even include same line comments? Or should i ignore them?
-# TODO How should i handle multiple line comments that use #? Could combine them all into single commment 
-    # Right now each line in multi line comment is counting as individual comment. Need to change this
-# TODO Find max sequence length of CODET5 and CODEBERT
-# If note in for or if statement should only continue up to next line 
-# TODO should i not remove whitespace from comments? 
-
 def get_pairs(filename, max_length, above=False):
     """Extracts inline comment and code pairs from a given file
 
