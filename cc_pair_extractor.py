@@ -242,21 +242,6 @@ def get_comment(lines, curr_line_index):
         return comment, False, last_line_ind
 
     comment, same_line = isolate_comment(line)
-
-    # # Removes all trailing and preceding whitespaces from line (including tabs)
-    # line_stripped = re.sub('\s+',' ', line).strip()
-    
-    # # Same line comments
-    # # Add support for same line comment FIXME
-    # if line_stripped[0] != '#':
-    #     comm_start = line_stripped.find("#")
-    #     line_stripped = line_stripped[comm_start:]
-    #     same_line = True
-
-    # # Isolate just text of comment
-    # comment = line_stripped[1:]
-    # comment.strip() # removes potential space between # and actual comment
-
     return comment, same_line, last_line_ind 
 
 def isolate_comment(line):
@@ -398,13 +383,7 @@ def get_all_pairs(directory, max_length, out_file, above=False, num_files=0):
     options = ['train', 'test', 'eval']
     opt_i = 0
     count = 0
-    # for idx, group in pairs.groupby(np.arange(len(pairs))//150000): 
-    #     group.to_json(f'{idx}_{options[opt_i]}.json', orient='records', lines=True)
-    #     count+= 1
-    #     if count == 10:
-    #         opt_i+=1
-    #     if count == 13:
-    #         opt_i += 1
+
     pairs.to_json(out_file, orient='records', lines=True)
     # print(len(pairs.index))
     print(len(pairs.index))
@@ -542,102 +521,6 @@ def get_similarity(code, comment):
     bleu_score = sentence_bleu([code_list], comment_list, smoothing_function=smoothing)
     return bleu_score
 
-# Creating a list of all code/comm pairs
-# directory = 'py_files'
-# out_file = 'all_pairs.json'
-# pairs = get_all_pairs(directory, 5, out_file)
-
-# Splitting into train, test, and validation sets
-# split_pairs()
-
-
 # Checking similarity functions 
 with open("all_pairs.jsonl", encoding="utf-8") as f:
     pairs = f.readlines()
-
-# Convert list of strings to list of dicts
-pairs = [json.loads(p) for p in pairs]
-
-# print(type(pairs)) 
-# for p in pairs:
-#     # Convert string to dictionary 
-#     p = json.loads(p)
-
-
-# most_similar = get_n_most_similar(-1, pairs)
-# # print(most_similar)
-# # for p in most_similar:
-# #     print("----------------------------------------------------------------------")
-# #     print(is_valid_python(p["comm"].strip()))
-# #     print(p["sim"])
-# #     print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
-# #     print(p["comm"])
-# #     print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
-# #     print(p["code"])
-# #     print()
-# #     print("----------------------------------------------------------------------")
-
-# # Adding all the sim values in most_similar
-# all_sims = [p["sim"] for p in most_similar]
-# sum_sims = sum(all_sims)
-# num_zero_sims = len([s for s in all_sims if s == 0])
-# nonzero_sims = [s for s in all_sims if s != 0]
-# sim_nonzero_sims = sum(nonzero_sims)
-
-# num_sims_gt = len([s for s in all_sims if s >= 0.01])
-
-# mean_sim = sum_sims / len(most_similar)
-# print(f"Mean similarity: {mean_sim}")
-# print(f"Mean nonzero similarity: {sim_nonzero_sims / len(nonzero_sims)}")
-# print(f"Number of zero sims {num_zero_sims}")
-# print(f"Num sims greater than 0.01: {num_sims_gt}")
-# print(f"Meadian nonzero similarity: {np.median(nonzero_sims)}")
-
-pairs_high_sim = get_n_most_similar(96839, pairs)
-pairs_high_sim = pd.DataFrame(pairs_high_sim)
-
-pairs_high_sim.to_json("high_sim_pairs.jsonl", orient='records', lines=True)
-
-split_pairs("high_sim_pairs.jsonl")
-
-
-# Create a histogram showing the distribution of lengths of comments and code
-# plt.hist(examples['comm'].str.len(), bins=100)
-# plt.show()
-# plt.hist(examples['code'].str.len(), bins=100)
-# plt.show()
-
-
-
-
-
-#TODO make sure to filter out duplicate comments
-
-
-# for index, p in pairs.iterrows():
-    # print(f'(({pairs['comment']})))')
-    # print(f"((({p['comment']})))x")
-    # print('\n')
-    # print(p['below_code'])
-
-# print(len(pairs))
-# test = 'for_test.txt'
-# if_pairs = get_pairs(test, 124141)
-# for p in if_pairs:
-#     print(f"((({p['comment']})))")
-#     print(p['below_code'])
-
-
-
-# with open(test, 'r') as f:
-#     lines = f.readlines()
-
-# pairs = []
-
-# for l in lines:
-#     # print(get_indent_level(l))
-#     print(l == '\n')
-#     print(l)
-
-
-
